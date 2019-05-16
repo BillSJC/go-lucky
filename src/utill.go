@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"math/rand"
 	"time"
 )
@@ -47,4 +48,26 @@ func (s *Service) recordListGen(d []*LuckyItem, baseInfo *LuckyCreateBody) ([]*L
 		listN[i].ShouldTime = s.int64ToTime(int64(baseInfo.StartTime + int64(i)*timeScrap))
 	}
 	return listN, nil
+}
+
+func (s *Service) makeSuccessJSON(data interface{}) (int, interface{}) {
+	return 200, gin.H{
+		"error": 0,
+		"msg":   "success",
+		"data":  data,
+	}
+}
+
+func (s *Service) makeErrJSON2(code int, msg interface{}) (int, interface{}) {
+	return code / 100, gin.H{
+		"error": code,
+		"msg":   fmt.Sprint(msg),
+	}
+}
+
+func (s *Service) makeErrJSON3(httpCode int, code int, msg string) (int, interface{}) {
+	return httpCode, gin.H{
+		"error": code,
+		"msg":   fmt.Sprint(msg),
+	}
 }

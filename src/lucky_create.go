@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"github.com/gin-gonic/gin"
 )
 
 /*
@@ -11,13 +11,29 @@ func (s *Service)getLucky(openid string)(result string,status int,err error){
 }
 */
 type LuckyCreateBody struct {
-	Name      string
-	StartTime int64
-	EndTime   int64
-	Item      []struct {
+	Name                string
+	TimesPerDay         int
+	AllowReLuckyWhenGet bool
+	StartTime           int64
+	EndTime             int64
+	Item                []struct {
 		Name  string
 		Count int
 	}
+}
+
+//handler
+func (s *Service) LuckyCreateHandler(c *gin.Context) (int, interface{}) {
+	input := new(LuckyCreateBody)
+	err := c.ShouldBindJSON(input)
+	if err != nil {
+		return s.makeErrJSON2(50010, err)
+	}
+	id, status, err := s.createLucky(input)
+	if err != nil {
+		return s.makeErrJSON2(status, err)
+	}
+	return s.makeSuccessJSON(gin.H{"luckyID": id})
 }
 
 func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err error) {
@@ -37,7 +53,13 @@ func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err e
 		}
 	}
 	//build struct Lucky
-	dLucky := &Lucky{Name: data.Name, StartTime: s.int64ToTime(data.StartTime), EndTime: s.int64ToTime(data.EndTime)}
+	dLucky := &Lucky{
+		Name:                data.Name,
+		StartTime:           s.int64ToTime(data.StartTime),
+		EndTime:             s.int64ToTime(data.EndTime),
+		AllowReLuckyWhenGet: data.AllowReLuckyWhenGet,
+		TimesPerDay:         data.TimesPerDay,
+	}
 
 	//begin tx
 	tx := s.DB.Begin()
@@ -48,7 +70,7 @@ func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err e
 	}
 	tempData1 := new(Lucky)
 	//get newest ID
-	tx.Model(&Lucky{}).Order("create_at DESC").Find(tempData1)
+	tx.Model(&Lucky{}).Order("created_at DESC").Find(tempData1)
 	if tempData1.Name == "" {
 		tx.Rollback()
 		return 0, 50001, fmt.Errorf("error when insert data")
@@ -61,9 +83,12 @@ func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err e
 		items = append(items, &LuckyItem{Name: v.Name, Count: v.Count, LuckyID: LuckyID})
 	}
 	//Create Objects LuckyItem
-	if tx.Create(items).RowsAffected != int64(len(items)) {
-		tx.Rollback()
-		return 0, 50002, fmt.Errorf("error when insert data")
+	for _, v := range items {
+		tx = tx.Create(v)
+		if tx.RowsAffected != 1 {
+			tx.Rollback()
+			return 0, 50002, fmt.Errorf("error when insert data")
+		}
 	}
 
 	//get items data
@@ -80,12 +105,15 @@ func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err e
 		tx.Rollback()
 		return 0, 50004, fmt.Errorf("error when insert data")
 	}
-
-	if tx.Create(records).RowsAffected != int64(len(records)) {
-		tx.Rollback()
-		return 0, 50005, fmt.Errorf("error when insert data")
+	for _, v := range records {
+		tx = tx.Create(v)
+		if tx.RowsAffected != 1 {
+			tx.Rollback()
+			return 0, 50005, fmt.Errorf("error when insert data")
+		}
 	}
 
+	tx.Commit()
 	return LuckyID, 0, nil
 
 }

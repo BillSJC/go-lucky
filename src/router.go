@@ -22,7 +22,10 @@ func (s *Service) initRouter() {
 	})
 
 	s.Router.POST("/lucky", func(c *gin.Context) {
-
+		c.JSON(s.LuckyCreateHandler(c))
 	})
+
+	err := s.Router.Run(s.Conf.Port)
+	panic(err)
 
 }

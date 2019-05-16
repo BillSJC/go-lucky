@@ -7,9 +7,11 @@ import (
 
 type Lucky struct {
 	gorm.Model
-	Name      string
-	StartTime *time.Time
-	EndTime   *time.Time
+	Name                string
+	StartTime           *time.Time
+	EndTime             *time.Time
+	TimesPerDay         int
+	AllowReLuckyWhenGet bool
 }
 
 type LuckyItem struct {
@@ -25,5 +27,5 @@ type LuckyRecord struct {
 	RealTime   *time.Time
 	ItemID     uint
 	LuckyID    uint
-	Owner      uint
+	Owner      string
 }
