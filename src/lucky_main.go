@@ -2,9 +2,33 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"strconv"
 	"time"
 )
+
+func (s Service) getLuckyHandler(c *gin.Context) (int, interface{}) {
+	err := s.Auth(c)
+	if err != nil {
+		return s.makeErrJSON2(40100, "unauthorized")
+	}
+
+	user := c.Query("user")
+	ids := c.Query("id")
+	id, err := strconv.Atoi(ids)
+	if err != nil || id <= 0 {
+		return s.makeErrJSON2(40330, "id invalid")
+	}
+	uid := uint(id)
+	name, errCode, err := s.getLucky(user, uid)
+	if err != nil {
+		return s.makeErrJSON2(errCode, err)
+	}
+	return s.makeSuccessJSON(gin.H{
+		"rewards": name,
+	})
+}
 
 func (s *Service) getLucky(user string, id uint) (name string, errCode int, err error) {
 	l := new(Lucky)

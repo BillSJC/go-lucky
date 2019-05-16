@@ -18,7 +18,7 @@ func (s *Service) initRouter() {
 	}
 
 	s.Router.GET("/lucky", func(c *gin.Context) {
-
+		c.JSON(s.getLuckyHandler(c))
 	})
 
 	s.Router.POST("/lucky", func(c *gin.Context) {

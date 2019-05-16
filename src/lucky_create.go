@@ -24,8 +24,12 @@ type LuckyCreateBody struct {
 
 //handler
 func (s *Service) LuckyCreateHandler(c *gin.Context) (int, interface{}) {
+	err := s.Auth(c)
+	if err != nil {
+		return s.makeErrJSON2(40100, "unauthorized")
+	}
 	input := new(LuckyCreateBody)
-	err := c.ShouldBindJSON(input)
+	err = c.ShouldBindJSON(input)
 	if err != nil {
 		return s.makeErrJSON2(50010, err)
 	}
