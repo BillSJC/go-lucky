@@ -1,0 +1,3 @@
+*.exe
+/config_lucky/app.toml
+.idea/*
