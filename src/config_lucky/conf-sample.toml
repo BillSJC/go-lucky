@@ -1,8 +1,18 @@
+# serve port
+# ":" + port number
 Port = ":12311"
 
+# open CORS
+# add cors headers in response
+# should be open when use PWA
 Cors = true
 
+# service key
+# use header "Authorization:sign {key}" to request service
 Key = "key"
 
+# DB config (MySQL)
 [DB]
-    dsn = ""
+    # gorm connect DSN
+    # find doc at http://gorm.book.jasperxu.com/database.html#111-mysql
+    dsn = "user:password@/dbname?charset=utf8&parseTime=True&loc=Local"
