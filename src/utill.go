@@ -32,7 +32,6 @@ func (s *Service) recordListGen(d []*LuckyItem, baseInfo *LuckyCreateBody) ([]*L
 		count += v.Count
 	}
 	timeScrap := (baseInfo.StartTime - baseInfo.EndTime) / int64(count)
-	fmt.Println(timeScrap)
 	//resort
 	for i := 0; i < count; i++ {
 		j := rand.Int() % count
@@ -74,7 +73,6 @@ func (s *Service) makeErrJSON3(httpCode int, code int, msg string) (int, interfa
 
 func (s *Service) getDayBeginAndEnd() (*time.Time, *time.Time) {
 	timeStr := time.Now().Format("2006-01-02")
-	fmt.Println("timeStr:", timeStr)
 	t, _ := time.Parse("2006-01-02", timeStr)
 	timeDayBegin := time.Unix(t.Unix(), 0)
 	timeNextDayBegin := time.Unix(t.Unix()+86400-1, 0)

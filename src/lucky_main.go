@@ -76,12 +76,9 @@ func (s *Service) getLucky(user string, id uint) (name string, errCode int, err 
 	itemName := ""
 	if item.ItemID <= 0 {
 		//unlucky
-		fmt.Println("unlucky")
 	} else {
 		//lucky
-		fmt.Println("lucky")
 		itemID := item.ItemID
-		fmt.Println(item)
 		lt := new(LuckyItem)
 		s.DB.Where(&LuckyItem{Model: gorm.Model{ID: itemID}}).Find(lt)
 		if lt.Name == "" {
