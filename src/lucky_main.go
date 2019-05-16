@@ -47,9 +47,9 @@ func (s *Service) getLucky(user string, id uint) (name string, errCode int, err 
 
 	//out of time
 	if l.TimesPerDay > 0 {
-		records := make([]LuckyRecord, 0, 100)
+		records := make([]LuckyRecordAll, 0, 100)
 		tb, te := s.getDayBeginAndEnd()
-		s.DB.Model(&LuckyRecordAll{}).Where(&LuckyRecordAll{Owner: user}).Where("created_at > ? AND created_at < ?", tb, te).Find(records)
+		s.DB.Model(&LuckyRecordAll{}).Where(&LuckyRecordAll{Owner: user}).Where("created_at > ? AND created_at < ?", tb, te).Find(&records)
 		if len(records) >= l.TimesPerDay {
 			return "", 40320, fmt.Errorf("lucky out of time")
 		}
@@ -65,9 +65,8 @@ func (s *Service) getLucky(user string, id uint) (name string, errCode int, err 
 	}
 
 	//check if lucky
-	tb, te := s.getDayBeginAndEnd()
 	item := new(LuckyRecord)
-	s.DB.Where(&LuckyRecord{Model: gorm.Model{ID: id}}).Where("should_time > ? AND should_time < ? AND owner IS NULL", tb, te).Find(item)
+	s.DB.Where(&LuckyRecord{Model: gorm.Model{ID: id}}).Where("should_time < ? AND owner = ''", time.Now()).Find(item)
 	//log
 	err = s.luckyRecord(user)
 	if err != nil {
@@ -77,9 +76,12 @@ func (s *Service) getLucky(user string, id uint) (name string, errCode int, err 
 	itemName := ""
 	if item.ItemID <= 0 {
 		//unlucky
+		fmt.Println("unlucky")
 	} else {
 		//lucky
+		fmt.Println("lucky")
 		itemID := item.ItemID
+		fmt.Println(item)
 		lt := new(LuckyItem)
 		s.DB.Where(&LuckyItem{Model: gorm.Model{ID: itemID}}).Find(lt)
 		if lt.Name == "" {

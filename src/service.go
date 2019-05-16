@@ -44,7 +44,7 @@ func (s *Service) initDB() {
 
 func (s *Service) initTable() {
 	//insert DB struct here
-	iss := []interface{}{&Lucky{}, &LuckyItem{}, &LuckyRecord{}}
+	iss := []interface{}{&Lucky{}, &LuckyItem{}, &LuckyRecord{}, &LuckyRecordAll{}}
 	for _, v := range iss {
 		if !s.DB.HasTable(v) {
 			s.DB.CreateTable(v)
