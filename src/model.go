@@ -29,3 +29,8 @@ type LuckyRecord struct {
 	LuckyID    uint
 	Owner      string
 }
+
+type LuckyRecordAll struct {
+	gorm.Model
+	Owner string
+}

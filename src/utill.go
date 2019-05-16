@@ -71,3 +71,12 @@ func (s *Service) makeErrJSON3(httpCode int, code int, msg string) (int, interfa
 		"msg":   fmt.Sprint(msg),
 	}
 }
+
+func (s *Service) getDayBeginAndEnd() (*time.Time, *time.Time) {
+	timeStr := time.Now().Format("2006-01-02")
+	fmt.Println("timeStr:", timeStr)
+	t, _ := time.Parse("2006-01-02", timeStr)
+	timeDayBegin := time.Unix(t.Unix(), 0)
+	timeNextDayBegin := time.Unix(t.Unix()+86400-1, 0)
+	return &timeDayBegin, &timeNextDayBegin
+}
