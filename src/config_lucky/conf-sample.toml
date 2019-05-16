@@ -2,5 +2,7 @@ Port = ":12311"
 
 Cors = true
 
+Key = "key"
+
 [DB]
     dsn = ""

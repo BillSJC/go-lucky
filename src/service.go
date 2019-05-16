@@ -15,6 +15,7 @@ type Service struct {
 
 type conf struct {
 	Port string
+	Key  string
 	DB   struct {
 		Dsn string
 	}
