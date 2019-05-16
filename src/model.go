@@ -8,7 +8,6 @@ import (
 type Lucky struct {
 	gorm.Model
 	Name      string
-	Items     []LuckyItem
 	StartTime *time.Time
 	EndTime   *time.Time
 }
@@ -18,4 +17,13 @@ type LuckyItem struct {
 	LuckyID uint
 	Name    string
 	Count   int
+}
+
+type LuckyRecord struct {
+	gorm.Model
+	ShouldTime *time.Time
+	RealTime   *time.Time
+	ItemID     uint
+	LuckyID    uint
+	Owner      uint
 }

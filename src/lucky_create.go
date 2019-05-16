@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
-	"time"
+	"math/rand"
 )
 
 /*
@@ -37,5 +36,56 @@ func (s *Service) createLucky(data *LuckyCreateBody) (id uint, status int, err e
 			return 0, 40003, fmt.Errorf("item data error")
 		}
 	}
+	//build struct Lucky
 	dLucky := &Lucky{Name: data.Name, StartTime: s.int64ToTime(data.StartTime), EndTime: s.int64ToTime(data.EndTime)}
+
+	//begin tx
+	tx := s.DB.Begin()
+	//create Object Lucky
+	if tx.Create(dLucky).RowsAffected != 1 {
+		tx.Rollback()
+		return 0, 50000, fmt.Errorf("error when insert data")
+	}
+	tempData1 := new(Lucky)
+	//get newest ID
+	tx.Model(&Lucky{}).Order("create_at DESC").Find(tempData1)
+	if tempData1.Name == "" {
+		tx.Rollback()
+		return 0, 50001, fmt.Errorf("error when insert data")
+	}
+	LuckyID := tempData1.ID
+
+	//build Objects LuckyItem
+	items := make([]*LuckyItem, 0, 100)
+	for _, v := range data.Item {
+		items = append(items, &LuckyItem{Name: v.Name, Count: v.Count, LuckyID: LuckyID})
+	}
+	//Create Objects LuckyItem
+	if tx.Create(items).RowsAffected != int64(len(items)) {
+		tx.Rollback()
+		return 0, 50002, fmt.Errorf("error when insert data")
+	}
+
+	//get items data
+	items2 := make([]*LuckyItem, 0, len(items))
+	tx.Model(&LuckyItem{}).Where(&LuckyItem{LuckyID: LuckyID}).Find(&items2)
+	if len(items2) != len(items) {
+		tx.Rollback()
+		return 0, 50003, fmt.Errorf("error when insert data")
+	}
+
+	records, err := s.recordListGen(items2, data)
+
+	if err != nil {
+		tx.Rollback()
+		return 0, 50004, fmt.Errorf("error when insert data")
+	}
+
+	if tx.Create(records).RowsAffected != int64(len(records)) {
+		tx.Rollback()
+		return 0, 50005, fmt.Errorf("error when insert data")
+	}
+
+	return LuckyID, 0, nil
+
 }
